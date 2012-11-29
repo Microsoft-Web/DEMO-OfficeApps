@@ -1,0 +1,110 @@
+Office Apps Demo Script
+=======================
+
+--------------------------------------------------------------------------------------------------
+DEMO 1: Creating an Office App to Send Data to a Web API
+--------------------------------------------------------------------------------------------------
+
+01. Create a new Office Apps Project
+02. Select Excel and Word
+03. Once the project is created, run it to show how it works out of the box
+04. Paste the following HTML into the HTML file for the project:
+
+<div id="Content">
+    <button type="button" id="save">Save</button>
+    <table id="tbl"></table>
+</div>
+
+05. Paste the following JavaScript into the .JS file for the Office App:
+
+Office.initialize = function (reason) {
+    $(document).ready(function () {
+        $('#save').click(function () {
+            var url = 'CHANGE ME';
+            Office.context.document.bindings.addFromPromptAsync(Office.BindingType.Matrix, { id: 'myBinding' }, function (asyncResult) {
+		        if (asyncResult.status == Office.AsyncResultStatus.Failed) {
+		            write('Action failed. Error: ' + asyncResult.error.message);
+		        } else {
+		            asyncResult.value.getDataAsync({ coercionType: 'matrix' }, function (e) {
+
+		                var j = $.map(e.value, function (val, y) {
+		                    return { first: val[0], last: val[1] };
+		                });
+
+		                $.each(j, function (i, item) {
+		                    $.post(url, item, function (data)
+		                    {
+		                        $('#tbl').append('<tr><td>' + data + '</td></tr>');
+		                    });
+		                });
+		            });
+		        }
+		    });
+        });
+    });
+};
+
+06. Add a new MVC project to the solution and select Web API from the project type dialog
+07. Delete the ValuesController.cs file
+08. Add a new empty Web API controller to the project named DataCollectionController.cs
+09. Add the following code to the controller:
+
+public string Post(JToken parm)
+{
+    return string.Format("{0} {1} saved", parm["first"], parm["last"]);
+}
+
+10. Open the project properties for the MVC app and get the URL of the site from the Web tab
+11. Paste the URL into the JavaScript to replace the 'CHANGE ME' text and make sure to get the correct URL suffix (/api/controller, etc)
+12. Open the solution properties and set the startup project to be "multiple" and to start both the Office App and the MVC app
+13. Run the demo, make some data in Excel, click the button
+14. Put a breakpoint in the Web API controller to show that it is being called and re-run the demo
+
+--------------------------------------------------------------------------------------------------
+DEMO 2: Change the Solution to Use the MVC Project Rather than the Office Web Project
+--------------------------------------------------------------------------------------------------
+01. Select the Office App project and open the Properties window
+02. Change the "Web Project" property to point to the MVC project
+03. Click Yes to set the web project up with the appropriate scripts
+04. Show the new scripts added to the web project
+05. Copy the main JS file from the original web app over to the MVC app's scripts folder
+06. Overwrite the _Layout.cshtml file's content with the code below:
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <script src="~/Scripts/jquery-1.7.1.js"></script>
+    <script src="~/Scripts/Office/1.0/MicrosoftAjax.js"></script>
+    <script src="~/Scripts/Office/1.0/office.js"></script>
+    <script src="~/Scripts/DataCollectionApp.js"></script>
+</head>
+<body>
+    @RenderBody()
+</body>
+</html>
+
+07. Overwrite the content from Index.cshtml with the code below:
+
+<div id="Content">
+    <button type="button" id="save">Save</button>
+    <table id="tbl" border="1"></table>
+</div>
+
+08. Replace the code from the XML manifest file to reflect the MVC app's URL by changing this code:
+
+<DefaultSettings>
+	<SourceLocation DefaultValue="~remoteAppUrl/Pages/DataCollectionApp.html" />
+</DefaultSettings>
+
+TO THIS:
+
+<DefaultSettings>
+	<SourceLocation DefaultValue="APP URL" />
+</DefaultSettings>
+
+09. Change the APP URL text to reflect the MVC application's URL
+10. Delete the office web project from the solution
+11. Re-run the demo
