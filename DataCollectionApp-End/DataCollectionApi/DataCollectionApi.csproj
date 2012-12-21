@@ -351,6 +351,7 @@
     <Content Include="Scripts\Office\1.0\lv-lv\office_strings.js" />
     <Content Include="Scripts\Office\1.0\lv-lv\outlook_strings.debug.js" />
     <Content Include="Scripts\Office\1.0\lv-lv\outlook_strings.js" />
+    <Content Include="Scripts\Office\1.0\MicrosoftAjax.js" />
     <Content Include="Scripts\Office\1.0\ms-my\office_strings.debug.js" />
     <Content Include="Scripts\Office\1.0\ms-my\office_strings.js" />
     <Content Include="Scripts\Office\1.0\ms-my\outlook_strings.debug.js" />
